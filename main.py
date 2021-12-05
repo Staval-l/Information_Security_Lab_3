@@ -56,7 +56,17 @@ def decrypt_symmetric_key(path_to_symmetric_key: str, path_to_secret_key: str):
 
 def encrypt_file(path_to_initial_file: str, path_to_secret_key: str, path_to_symmetric_key: str,
                  path_to_encrypt_file: str) -> None:
-    return True
+    symmetrical_key = decrypt_symmetric_key(path_to_symmetric_key, path_to_secret_key)
+    with open(path_to_initial_file, 'r', encoding='utf-8') as file:
+        txt = file.read()
+    nonce = os.urandom(16)
+    algorithm = algorithms.ChaCha20(symmetrical_key, nonce)
+    cipher = Cipher(algorithm, mode=None)
+    encrypt = cipher.encryptor()
+    cipher_txt = encrypt.update(bytes(txt, 'utf-8'))
+    res = {'cipertxt': cipher_txt, 'nonce': nonce}
+    with open(path_to_encrypt_file, 'wb') as file:
+        pickle.dump(res, file)
 
 
 def decrypt_file(path_to_encrypt_file: str, path_to_secret_key: str, path_to_symmetric_key: str,
