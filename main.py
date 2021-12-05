@@ -86,7 +86,17 @@ def decrypt_file(path_to_encrypt_file: str, path_to_secret_key: str, path_to_sym
 
 parser = argparse.ArgumentParser(description='main.py')
 group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument('-gen', '--generation', help='Запускает режим генерации ключей')
-group.add_argument('-enc', '--encryption', help='Запускает режим шифрования')
-group.add_argument('-dec', '--decryption', help='Запускает режим дешифрования')
+group.add_argument('-gen', '--generation', type=str, help='Запускает режим генерации ключей', dest='generation')
+group.add_argument('-enc', '--encryption', type=str, help='Запускает режим шифрования', dest='encryption')
+group.add_argument('-dec', '--decryption', type=str, help='Запускает режим дешифрования', dest='decryption')
 args = parser.parse_args()
+
+if args.generation is not None:
+    key_generation(path_symmetric_key, path_public_key, path_secret_key)
+    print('Ключи созданы')
+if args.encryption is not None:
+    encrypt_file(path_initial_file, path_secret_key, path_symmetric_key, path_encrypted_file)
+    print('Файл зашифрован')
+if args.decryption is not None:
+    decrypt_file(path_encrypted_file, path_secret_key, path_symmetric_key, path_decrypted_file)
+    print('Файл расшифрован')
