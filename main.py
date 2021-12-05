@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
 import os
 import pickle
 
+# Загрузка настроек из файла
 with open('settings.json') as json_file:
     json_data = json.load(json_file)
 
@@ -21,6 +22,11 @@ path_secret_key = json_data["secret_key"]
 
 
 def key_generation(path_to_symmetric_key: str, path_to_public_key: str, path_to_secret_key: str) -> None:
+    """
+    :param path_to_symmetric_key: Путь к файлу, где лежит зашифрованный симметричный ключ
+    :param path_to_public_key: Путь к файлу с публичным ключом
+    :param path_to_secret_key: Путь к файлу с секретным ключом
+    """
     symmetric_key = ChaCha20Poly1305.generate_key()
 
     keys = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -45,6 +51,10 @@ def key_generation(path_to_symmetric_key: str, path_to_public_key: str, path_to_
 
 
 def decrypt_symmetric_key(path_to_symmetric_key: str, path_to_secret_key: str):
+    """
+    :param path_to_symmetric_key: Путь к файлу, где лежит зашифрованный симметричный ключ
+    :param path_to_secret_key: Путь к файлу с секретным ключом
+    """
     with open(path_to_symmetric_key, 'rb') as file:
         enc_symmetrical_key = file.read()
     with open(path_to_secret_key, 'rb') as file:
@@ -56,6 +66,12 @@ def decrypt_symmetric_key(path_to_symmetric_key: str, path_to_secret_key: str):
 
 def encrypt_file(path_to_initial_file: str, path_to_secret_key: str, path_to_symmetric_key: str,
                  path_to_encrypt_file: str) -> None:
+    """
+    :param path_to_initial_file: Путь к файлу, в котором находится исходный текст
+    :param path_to_secret_key: Путь к файлу с секретным ключом
+    :param path_to_symmetric_key: Путь к файлу, где лежит зашифрованный симметричный ключ
+    :param path_to_encrypt_file: Путь к файлу, куда будет сохранен зашифрованный текст
+    """
     symmetrical_key = decrypt_symmetric_key(path_to_symmetric_key, path_to_secret_key)
     with open(path_to_initial_file, 'r', encoding='utf-8') as file:
         txt = file.read()
@@ -71,6 +87,12 @@ def encrypt_file(path_to_initial_file: str, path_to_secret_key: str, path_to_sym
 
 def decrypt_file(path_to_encrypt_file: str, path_to_secret_key: str, path_to_symmetric_key: str,
                  path_to_decrypted_file: str) -> None:
+    """
+    :param path_to_encrypt_file: Путь к файлу, где находится зашифрованный текст
+    :param path_to_secret_key: Путь к файлу с секретным ключом
+    :param path_to_symmetric_key: Путь к файлу, где лежит зашифрованный симметричный ключ
+    :param path_to_decrypted_file: Путь к файлу, куда будет сохранен расшифрованный текст
+    """
     symmetrical_key = decrypt_symmetric_key(path_to_symmetric_key, path_to_secret_key)
     with open(path_to_encrypt_file, 'rb') as file:
         cipher_tmp = pickle.load(file)
