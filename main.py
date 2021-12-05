@@ -64,14 +64,24 @@ def encrypt_file(path_to_initial_file: str, path_to_secret_key: str, path_to_sym
     cipher = Cipher(algorithm, mode=None)
     encrypt = cipher.encryptor()
     cipher_txt = encrypt.update(bytes(txt, 'utf-8'))
-    res = {'cipertxt': cipher_txt, 'nonce': nonce}
+    res = {'ciphertxt': cipher_txt, 'nonce': nonce}
     with open(path_to_encrypt_file, 'wb') as file:
         pickle.dump(res, file)
 
 
 def decrypt_file(path_to_encrypt_file: str, path_to_secret_key: str, path_to_symmetric_key: str,
                  path_to_decrypted_file: str) -> None:
-    return True
+    symmetrical_key = decrypt_symmetric_key(path_to_symmetric_key, path_to_secret_key)
+    with open(path_to_encrypt_file, 'rb') as file:
+        cipher_tmp = pickle.load(file)
+    cipher_txt = cipher_tmp['ciphertxt']
+    nonce = cipher_tmp['nonce']
+    algorithm = algorithms.ChaCha20(symmetrical_key, nonce)
+    cipher = Cipher(algorithm, mode=None)
+    decrypt = cipher.decryptor()
+    dec_txt = decrypt.update(cipher_txt) + decrypt.finalize()
+    with open(path_to_decrypted_file, 'w', encoding='utf-8') as file:
+        file.write(dec_txt.decode('utf-8'))
 
 
 parser = argparse.ArgumentParser(description='main.py')
